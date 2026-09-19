@@ -1,4 +1,4 @@
-import { lookupMint } from '../../_lib/coins.js'
+import { lookupMint } from '../_lib/coins.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
