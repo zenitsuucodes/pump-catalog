@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import type { Coin } from '../types'
 import { copyText, formatAge, formatMarketCap, twitterHandle } from '../utils'
+import { DeleteWarningModal } from './DeleteWarningModal'
 
 type Props = {
   coin: Coin
@@ -15,6 +16,8 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
   const [thoughts, setThoughts] = useState(coin.thoughts)
   const [saving, setSaving] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -57,20 +60,22 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
     }
   }
 
-  async function handleDelete() {
-    if (!confirm(`Remove $${coin.symbol || 'token'} from catalog?`)) return
+  async function handleDeleteConfirm() {
+    setDeleting(true)
     try {
       await api.deleteCoin(coin.id)
       onDeleted(coin.id)
       onToast('Token removed')
     } catch (err) {
       onToast(err instanceof Error ? err.message : 'Delete failed')
+      setDeleting(false)
     }
   }
 
   const handle = twitterHandle(coin.twitter)
 
   return (
+    <>
     <article className="token-card">
       <div className="token-hero">
         {coin.imageUri ? (
@@ -210,7 +215,12 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
             >
               ↻
             </button>
-            <button type="button" className="footer-icon danger" title="Remove" onClick={handleDelete}>
+            <button
+              type="button"
+              className="footer-icon danger"
+              title="Remove"
+              onClick={() => setShowDeleteWarning(true)}
+            >
               ✕
             </button>
           </div>
@@ -235,5 +245,18 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
         </div>
       </div>
     </article>
+
+    {showDeleteWarning && (
+      <DeleteWarningModal
+        symbol={coin.symbol}
+        name={coin.name}
+        deleting={deleting}
+        onCancel={() => {
+          if (!deleting) setShowDeleteWarning(false)
+        }}
+        onConfirm={handleDeleteConfirm}
+      />
+    )}
+    </>
   )
 }

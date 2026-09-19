@@ -127,6 +127,45 @@ button {
   cursor: not-allowed;
 }
 
+.btn-danger-solid {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger-solid:hover {
+  filter: brightness(1.08);
+}
+
+.delete-warning-modal {
+  text-align: center;
+  max-width: 420px;
+}
+
+.delete-warning-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.85rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.delete-warning-modal h2 {
+  margin-bottom: 0.5rem;
+}
+
+.delete-warning-modal .modal-sub {
+  line-height: 1.5;
+}
+
+.delete-warning-modal .form-actions {
+  justify-content: center;
+}
+
 .catalog-main {
   flex: 1;
   padding: 1.5rem;

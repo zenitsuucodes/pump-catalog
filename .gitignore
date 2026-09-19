@@ -6,3 +6,6 @@ server/data/catalog.json
 *.db-*
 .DS_Store
 .vercel
+
+.vercel
+.env*
