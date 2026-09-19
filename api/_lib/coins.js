@@ -1,9 +1,17 @@
 import { fetchPumpCoin, mapPumpData, normalizeLink, toLookupResponse } from './pump.js'
+import { normalizeImageUri } from './images.js'
 import { getStore, nowIso, saveStore } from './storage.js'
+
+function withNormalizedImage(coin) {
+  if (!coin?.imageUri) return coin
+  const normalized = normalizeImageUri(coin.imageUri)
+  if (normalized === coin.imageUri) return coin
+  return { ...coin, imageUri: normalized }
+}
 
 export async function listCoins() {
   const store = await getStore()
-  return [...store.coins].sort((a, b) => b.id - a.id)
+  return [...store.coins].map(withNormalizedImage).sort((a, b) => b.id - a.id)
 }
 
 export async function lookupMint(mint) {
@@ -41,7 +49,7 @@ export async function addCoin(body) {
       name: manualMeta.name || 'Unknown',
       symbol: manualMeta.symbol || '???',
       description: manualMeta.description || '',
-      imageUri: manualMeta.imageUri || null,
+      imageUri: normalizeImageUri(manualMeta.imageUri) || null,
       twitter: normalizeLink(manualMeta.twitter),
       website: normalizeLink(manualMeta.website),
       telegram: normalizeLink(manualMeta.telegram),

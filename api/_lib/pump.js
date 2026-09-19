@@ -1,3 +1,5 @@
+import { normalizeImageUri } from './images.js'
+
 export function normalizeLink(value) {
   if (!value || typeof value !== 'string') return null
   const trimmed = value.trim()
@@ -58,7 +60,7 @@ export function mapPumpData(coin, mint) {
     name: coin.name || 'Unknown',
     symbol: coin.symbol || '???',
     description: coin.description || '',
-    imageUri: coin.image_uri || null,
+    imageUri: normalizeImageUri(coin.image_uri) || null,
     twitter: twitterFinal,
     website: websiteFinal,
     telegram: normalizeLink(coin.telegram),

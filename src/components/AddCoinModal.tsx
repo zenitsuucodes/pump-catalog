@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { api } from '../api'
 import type { LookupResult } from '../types'
 import { formatMarketCap } from '../utils'
+import { CoinImage } from './CoinImage'
 
 type Props = {
   onClose: () => void
@@ -131,11 +132,7 @@ export function AddCoinModal({ onClose, onAdded }: Props) {
               </div>
               {preview && (
                 <div className="preview-card">
-                  {preview.imageUri ? (
-                    <img src={preview.imageUri} alt="" />
-                  ) : (
-                    <div className="preview-placeholder">{(preview.symbol || '?').slice(0, 3)}</div>
-                  )}
+                  <CoinImage uri={preview.imageUri} symbol={preview.symbol} className="preview-img" />
                   <div>
                     <strong>{preview.name}</strong>
                     <span>${preview.symbol}</span>

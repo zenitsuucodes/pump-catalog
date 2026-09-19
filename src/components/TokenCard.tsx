@@ -3,6 +3,7 @@ import { api } from '../api'
 import type { Coin } from '../types'
 import { copyText, formatAge, formatMarketCap, twitterHandle } from '../utils'
 import { DeleteWarningModal } from './DeleteWarningModal'
+import { CoinImage } from './CoinImage'
 
 type Props = {
   coin: Coin
@@ -78,11 +79,7 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
     <>
     <article className="token-card">
       <div className="token-hero">
-        {coin.imageUri ? (
-          <img className="token-hero-img" src={coin.imageUri} alt="" loading="lazy" />
-        ) : (
-          <div className="token-hero-img placeholder">{(coin.symbol || '?').slice(0, 3)}</div>
-        )}
+        <CoinImage uri={coin.imageUri} symbol={coin.symbol} className="token-hero-img" />
         <div className="token-hero-overlay" />
         <div className="token-hero-top">
           {coin.isLive && (
