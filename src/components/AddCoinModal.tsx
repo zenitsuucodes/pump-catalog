@@ -3,6 +3,7 @@ import { api } from '../api'
 import type { LookupResult } from '../types'
 import { formatMarketCap } from '../utils'
 import { CoinImage } from './CoinImage'
+import { AutoResizeTextarea } from './AutoResizeTextarea'
 
 type Props = {
   onClose: () => void
@@ -181,9 +182,11 @@ export function AddCoinModal({ onClose, onAdded }: Props) {
 
           <div className="field">
             <label htmlFor="tweetText">Tweet text</label>
-            <textarea
+            <AutoResizeTextarea
               id="tweetText"
               value={tweetText}
+              minRows={3}
+              maxRows={14}
               onChange={(e) => setTweetText(e.target.value)}
               placeholder="What did the tweet say?"
             />
@@ -191,9 +194,11 @@ export function AddCoinModal({ onClose, onAdded }: Props) {
 
           <div className="field">
             <label htmlFor="thoughts">My thoughts</label>
-            <textarea
+            <AutoResizeTextarea
               id="thoughts"
               value={thoughts}
+              minRows={3}
+              maxRows={14}
               onChange={(e) => setThoughts(e.target.value)}
               placeholder="Initial notes on this launch…"
             />

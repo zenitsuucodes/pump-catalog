@@ -4,6 +4,7 @@ import type { Coin } from '../types'
 import { copyText, formatAge, formatMarketCap, twitterHandle } from '../utils'
 import { DeleteWarningModal } from './DeleteWarningModal'
 import { CoinImage } from './CoinImage'
+import { AutoResizeTextarea } from './AutoResizeTextarea'
 
 type Props = {
   coin: Coin
@@ -152,16 +153,17 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
               </a>
             )}
           </div>
-          <textarea
+          <AutoResizeTextarea
             className="content-box-input"
             value={tweetText}
+            minRows={2}
+            maxRows={12}
             onChange={(e) => {
               setTweetText(e.target.value)
               scheduleSave('tweetText', e.target.value)
             }}
             onBlur={() => persist({ tweetText })}
             placeholder="Paste the tweet text that launched this token…"
-            rows={3}
           />
         </div>
 
@@ -170,16 +172,17 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
             <span className="content-box-label">My thoughts</span>
             {saving && <span className="save-hint">Saving…</span>}
           </div>
-          <textarea
+          <AutoResizeTextarea
             className="content-box-input"
             value={thoughts}
+            minRows={2}
+            maxRows={12}
             onChange={(e) => {
               setThoughts(e.target.value)
               scheduleSave('thoughts', e.target.value)
             }}
             onBlur={() => persist({ thoughts })}
             placeholder="Your analysis, narrative angle, what stood out…"
-            rows={3}
           />
         </div>
 

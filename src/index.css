@@ -440,11 +440,12 @@ button {
   background: transparent;
   color: var(--text);
   padding: 0.65rem;
-  resize: vertical;
-  min-height: 72px;
+  resize: none;
+  overflow: hidden;
   line-height: 1.45;
   font-size: 0.88rem;
   outline: none;
+  field-sizing: content;
 }
 
 .content-box-input::placeholder {
@@ -654,8 +655,10 @@ button {
 }
 
 .field textarea {
-  min-height: 96px;
-  resize: vertical;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.45;
+  field-sizing: content;
 }
 
 .form-actions {
