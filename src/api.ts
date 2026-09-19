@@ -1,9 +1,7 @@
 import type { Coin, LookupResult } from './types'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
-
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${url}`, {    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+  const res = await fetch(url, {    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     ...init,
   })
   const data = await res.json().catch(() => ({}))

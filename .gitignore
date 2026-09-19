@@ -1,6 +1,8 @@
 node_modules
 dist
 server/data
+server/data/catalog.json
 *.db
 *.db-*
 .DS_Store
+.vercel
