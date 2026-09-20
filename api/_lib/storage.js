@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 
 const COINS_KEY = 'catalog:coins'
 const NEXT_ID_KEY = 'catalog:nextId'
+const TRACKER_KEY = 'catalog:tracker'
 
 const redis =
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
@@ -29,7 +30,7 @@ function readLocal() {
   } catch {
     /* ignore */
   }
-  return { coins: [], nextId: 1 }
+  return { coins: [], nextId: 1, tracker: undefined }
 }
 
 function writeLocal(data) {
@@ -39,15 +40,30 @@ function writeLocal(data) {
 
 export async function getStore() {
   if (useRedis) {
-    const [coins, nextId] = await Promise.all([redis.get(COINS_KEY), redis.get(NEXT_ID_KEY)])
-    return { coins: coins || [], nextId: nextId || 1 }
+    const [coins, nextId, tracker] = await Promise.all([
+      redis.get(COINS_KEY),
+      redis.get(NEXT_ID_KEY),
+      redis.get(TRACKER_KEY),
+    ])
+    return { coins: coins || [], nextId: nextId || 1, tracker: tracker || undefined }
   }
   return readLocal()
 }
 
+/** Tracker-only read — avoids loading the full coin catalog on status polls. */
+export async function getTrackerOnly() {
+  if (useRedis) {
+    const tracker = await redis.get(TRACKER_KEY)
+    return tracker || undefined
+  }
+  return readLocal().tracker
+}
+
 export async function saveStore(store) {
   if (useRedis) {
-    await Promise.all([redis.set(COINS_KEY, store.coins), redis.set(NEXT_ID_KEY, store.nextId)])
+    const ops = [redis.set(COINS_KEY, store.coins), redis.set(NEXT_ID_KEY, store.nextId)]
+    if (store.tracker) ops.push(redis.set(TRACKER_KEY, store.tracker))
+    await Promise.all(ops)
     return
   }
   writeLocal(store)

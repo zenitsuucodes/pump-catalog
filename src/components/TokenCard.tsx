@@ -118,6 +118,14 @@ export function TokenCard({ coin, onUpdated, onDeleted, onToast }: Props) {
             <div className="token-ticker">${coin.symbol || '???'}</div>
             <div className="token-name-row">
               <h3 className="token-name">{coin.name || 'Untitled'}</h3>
+              {coin.source === 'auto' && (
+                <span className="auto-badge">
+                  Wallet buy
+                  {coin.realizedProfitUsd != null
+                    ? ` · ${coin.realizedProfitUsd >= 0 ? '+' : ''}$${coin.realizedProfitUsd.toFixed(0)}`
+                    : ''}
+                </span>
+              )}
               {coin.peakMarketCap != null && (
                 <span className="peak-badge">Peak {formatMarketCap(coin.peakMarketCap)}</span>
               )}

@@ -1,6 +1,9 @@
+import { requireAuth } from './_lib/auth.js'
 import { addCoin, listCoins } from './_lib/coins.js'
 
 export default async function handler(req, res) {
+  if (!requireAuth(req, res)) return
+
   try {
     if (req.method === 'GET') {
       return res.status(200).json(await listCoins())

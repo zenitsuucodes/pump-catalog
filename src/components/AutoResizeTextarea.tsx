@@ -5,6 +5,10 @@ type Props = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   maxRows?: number
 }
 
+function isMeasurable(el: HTMLElement) {
+  return el.getClientRects().length > 0
+}
+
 export function AutoResizeTextarea({
   minRows = 2,
   maxRows,
@@ -14,12 +18,20 @@ export function AutoResizeTextarea({
   ...props
 }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null)
+  const pendingRef = useRef(false)
 
   const resize = useCallback(() => {
     const el = ref.current
     if (!el) return
 
-    el.style.height = '0px'
+    if (!isMeasurable(el)) {
+      pendingRef.current = true
+      return
+    }
+
+    pendingRef.current = false
+
+    el.style.height = 'auto'
     const styles = getComputedStyle(el)
     const lineHeight = Number.parseFloat(styles.lineHeight) || 20
     const padding =
@@ -43,8 +55,27 @@ export function AutoResizeTextarea({
   }, [value, resize])
 
   useEffect(() => {
-    window.addEventListener('resize', resize)
-    return () => window.removeEventListener('resize', resize)
+    const el = ref.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          requestAnimationFrame(resize)
+        }
+      },
+      { threshold: 0 },
+    )
+
+    observer.observe(el)
+
+    const onResize = () => resize()
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', onResize)
+    }
   }, [resize])
 
   return (

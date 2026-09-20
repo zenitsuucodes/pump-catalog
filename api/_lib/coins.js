@@ -1,5 +1,6 @@
 import { fetchPumpCoin, mapPumpData, normalizeLink, toLookupResponse } from './pump.js'
 import { normalizeImageUri } from './images.js'
+import { fetchTweetText } from './tweets.js'
 import { getStore, nowIso, saveStore } from './storage.js'
 
 function withNormalizedImage(coin) {
@@ -71,6 +72,10 @@ export async function addCoin(body) {
     ...meta,
     tweetText,
     thoughts,
+    source: 'manual',
+    trackedWallet: null,
+    realizedProfitUsd: null,
+    triggerSignature: null,
     createdAt: ts,
     updatedAt: ts,
   }
@@ -124,6 +129,100 @@ export async function refreshCoin(id) {
   store.coins[index] = updated
   await saveStore(store)
   return updated
+}
+
+async function buildWalletCatalogCoin({ mint, signature, wallet, thoughts, profitUsd = null }) {
+  const pump = await fetchPumpCoin(mint)
+  const meta = mapPumpData(pump, mint)
+
+  let tweetText = ''
+  if (meta.twitter) {
+    tweetText = await fetchTweetText(meta.twitter)
+  }
+  if (!tweetText && meta.description) tweetText = meta.description
+
+  const ts = nowIso()
+  return {
+    ...meta,
+    tweetText,
+    thoughts,
+    source: 'auto',
+    trackedWallet: wallet,
+    realizedProfitUsd: profitUsd != null ? Number(profitUsd) : null,
+    triggerSignature: signature,
+    createdAt: ts,
+    updatedAt: ts,
+  }
+}
+
+export async function catalogCoinFromWalletBuy({ mint, signature, wallet }) {
+  const store = await getStore()
+  const existing = store.coins.find((c) => c.mint === mint)
+  if (existing) return withNormalizedImage(existing)
+
+  const coin = {
+    id: store.nextId,
+    ...(await buildWalletCatalogCoin({
+      mint,
+      signature,
+      wallet,
+      thoughts: 'Auto-cataloged: tracked wallet bought this token.',
+    })),
+  }
+
+  store.coins.push(coin)
+  store.nextId += 1
+  await saveStore(store)
+  return withNormalizedImage(coin)
+}
+
+export async function autoAddCoinFromWallet({ mint, profitUsd, signature, wallet }) {
+  return catalogCoinFromWalletBuy({ mint, signature, wallet })
+}
+
+export async function removeAutoCoinByMint(mint) {
+  const store = await getStore()
+  const index = store.coins.findIndex((c) => c.mint === mint && c.source === 'auto')
+  if (index === -1) return { removed: false }
+
+  store.coins.splice(index, 1)
+  await saveStore(store)
+  return { removed: true, mint }
+}
+
+export async function updateCoinProfit(mint, profitUsd, signature) {
+  const store = await getStore()
+  const index = store.coins.findIndex((c) => c.mint === mint)
+  if (index === -1) return null
+
+  const existing = store.coins[index]
+  const profitLabel = Number(profitUsd).toFixed(0)
+  const sign = profitUsd >= 0 ? '+' : ''
+  const pnlNote = `Wallet PnL: ~${sign}$${profitLabel}`
+
+  let thoughts = existing.thoughts || ''
+  if (existing.source === 'auto') {
+    thoughts = `Auto-cataloged on buy. Closed with ~${sign}$${profitLabel} PnL.`
+  } else if (!thoughts.includes('Wallet PnL:')) {
+    thoughts = thoughts ? `${thoughts}\n\n${pnlNote}` : pnlNote
+  } else {
+    thoughts = thoughts.replace(/Wallet PnL: ~[+-]?\$\d+/g, pnlNote)
+  }
+
+  const updated = {
+    ...existing,
+    realizedProfitUsd: Number(profitUsd),
+    triggerSignature: signature || existing.triggerSignature,
+    thoughts,
+    updatedAt: nowIso(),
+  }
+  store.coins[index] = updated
+  await saveStore(store)
+  return withNormalizedImage(updated)
+}
+
+export async function updateAutoCoinProfit(mint, profitUsd, signature) {
+  return updateCoinProfit(mint, profitUsd, signature)
 }
 
 export async function deleteCoin(id) {

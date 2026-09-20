@@ -1,16 +1,24 @@
 :root {
-  --bg: #0b0b10;
-  --bg-elevated: #13131a;
-  --card: #16161f;
-  --card-border: rgba(255, 255, 255, 0.06);
-  --text: #f0f0f5;
-  --text-soft: #9a9aad;
-  --text-faint: #5c5c6e;
-  --purple: #a855f7;
-  --purple-dim: rgba(168, 85, 247, 0.15);
-  --green: #22c55e;
+  --sol-purple: #9945ff;
+  --sol-green: #14f195;
+  --sol-teal: #00ffa3;
+  --sol-gradient: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+  --sol-gradient-hover: linear-gradient(135deg, #a855ff 0%, #2dffb0 100%);
+  --sol-glow-purple: rgba(153, 69, 255, 0.35);
+  --sol-glow-green: rgba(20, 241, 149, 0.25);
+
+  --bg: #08090d;
+  --bg-elevated: #10121a;
+  --card: #12151f;
+  --card-border: rgba(153, 69, 255, 0.1);
+  --text: #f4f4f8;
+  --text-soft: #9ca3b8;
+  --text-faint: #5e6478;
+  --purple: var(--sol-purple);
+  --purple-dim: rgba(153, 69, 255, 0.14);
+  --green: var(--sol-green);
   --danger: #ef4444;
-  --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(153, 69, 255, 0.04);
   --font: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
   color-scheme: dark;
@@ -20,6 +28,10 @@
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -32,10 +44,29 @@ body {
   margin: 0;
   font-family: var(--font);
   color: var(--text);
+  overflow-x: hidden;
   background:
-    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(168, 85, 247, 0.12), transparent),
-    var(--bg);
+    radial-gradient(ellipse 90% 55% at 0% -5%, rgba(153, 69, 255, 0.22), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(20, 241, 149, 0.14), transparent 50%),
+    radial-gradient(ellipse 70% 45% at 50% 105%, rgba(153, 69, 255, 0.1), transparent 55%),
+    radial-gradient(ellipse 50% 30% at 80% 60%, rgba(0, 255, 163, 0.06), transparent 50%),
+    linear-gradient(180deg, #07080c 0%, #0a0d12 45%, #080b10 100%);
   background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(153, 69, 255, 0.03) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(20, 241, 149, 0.03) 100%
+  );
 }
 
 button,
@@ -49,6 +80,8 @@ button {
 }
 
 .app {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -58,14 +91,47 @@ button {
   position: sticky;
   top: 0;
   z-index: 40;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
+  gap: 1rem;
   padding: 1rem 1.5rem;
-  backdrop-filter: blur(16px);
-  background: rgba(11, 11, 16, 0.85);
-  border-bottom: 1px solid var(--card-border);
+  backdrop-filter: blur(20px) saturate(1.2);
+  background: rgba(8, 9, 13, 0.78);
+  border-bottom: 1px solid rgba(153, 69, 255, 0.12);
+  box-shadow:
+    0 1px 0 rgba(20, 241, 149, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.page-nav {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(153, 69, 255, 0.08);
+}
+
+.page-nav-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.page-nav-btn.active {
+  background: linear-gradient(135deg, rgba(153, 69, 255, 0.28), rgba(20, 241, 149, 0.12));
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px rgba(153, 69, 255, 0.2);
+}
+
+.page-nav-btn:hover {
+  color: var(--text);
 }
 
 .brand-mark {
@@ -76,7 +142,10 @@ button {
 }
 
 .brand-mark span {
-  color: var(--purple);
+  background: var(--sol-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .brand-sub {
@@ -104,12 +173,15 @@ button {
 }
 
 .btn-primary {
-  background: var(--purple);
-  color: #fff;
+  background: var(--sol-gradient);
+  color: #061018;
+  font-weight: 700;
+  box-shadow: 0 4px 20px var(--sol-glow-purple);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.08);
+  background: var(--sol-gradient-hover);
+  box-shadow: 0 6px 28px var(--sol-glow-purple), 0 0 20px var(--sol-glow-green);
 }
 
 .btn-ghost {
@@ -174,6 +246,24 @@ button {
   width: 100%;
 }
 
+.page-panel {
+  display: none;
+}
+
+.page-panel.is-active {
+  display: block;
+  animation: page-in 0.15s ease;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -182,12 +272,21 @@ button {
 }
 
 .token-card {
-  background: var(--card);
+  background: linear-gradient(165deg, rgba(20, 22, 32, 0.98) 0%, rgba(12, 14, 22, 0.99) 100%);
   border: 1px solid var(--card-border);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: var(--shadow);
   animation: card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.token-card:hover {
+  border-color: rgba(153, 69, 255, 0.22);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px rgba(20, 241, 149, 0.08),
+    0 0 30px rgba(153, 69, 255, 0.06);
 }
 
 .token-hero {
@@ -209,7 +308,7 @@ button {
   font-size: 2rem;
   font-weight: 800;
   color: var(--text-faint);
-  background: linear-gradient(135deg, #1a1a24, #0f0f16);
+  background: linear-gradient(135deg, rgba(153, 69, 255, 0.15), rgba(20, 241, 149, 0.08));
 }
 
 .token-hero-overlay {
@@ -253,8 +352,8 @@ button {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
+  background: var(--sol-green);
+  box-shadow: 0 0 10px var(--sol-green);
   animation: pulse 1.5s ease infinite;
 }
 
@@ -295,6 +394,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .token-platform-row {
@@ -310,11 +410,11 @@ button {
   gap: 0.35rem;
   padding: 0.28rem 0.55rem;
   border-radius: 999px;
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: rgba(20, 241, 149, 0.1);
+  border: 1px solid rgba(20, 241, 149, 0.28);
   font-size: 0.72rem;
   font-weight: 600;
-  color: #86efac;
+  color: #5dffc0;
 }
 
 .pill-icon {
@@ -371,6 +471,203 @@ button {
   color: var(--text-soft);
 }
 
+.auto-badge {
+  padding: 0.18rem 0.45rem;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(153, 69, 255, 0.2), rgba(20, 241, 149, 0.1));
+  border: 1px solid rgba(153, 69, 255, 0.35);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+.tracker-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.5rem;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  background: linear-gradient(
+    90deg,
+    rgba(153, 69, 255, 0.1) 0%,
+    rgba(20, 241, 149, 0.06) 50%,
+    rgba(153, 69, 255, 0.08) 100%
+  );
+  border-bottom: 1px solid rgba(20, 241, 149, 0.12);
+}
+
+.tracker-bar code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #7dffc8;
+}
+
+.tracker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.tracker-dot.live {
+  background: var(--sol-green);
+  box-shadow: 0 0 10px var(--sol-green);
+  animation: pulse 1.5s ease infinite;
+}
+
+.live-label {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sol-green);
+}
+
+.page-heading {
+  margin-bottom: 1rem;
+}
+
+.page-heading h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  background: var(--sol-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.page-heading p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trade-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.85rem;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+}
+
+.trade-img,
+.trade-img.placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.trade-img.placeholder {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 800;
+  color: var(--text-faint);
+}
+
+.trade-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.trade-ticker {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--purple);
+}
+
+.trade-name {
+  font-weight: 700;
+  margin-top: 0.1rem;
+}
+
+.side-pill {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.side-pill.side-buy {
+  background: rgba(20, 241, 149, 0.15);
+  color: #5dffc0;
+}
+
+.side-pill.side-sell {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.trade-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.trade-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  min-width: 110px;
+}
+
+.trade-profit {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.trade-profit.positive {
+  color: #5dffc0;
+}
+
+.trade-profit.negative {
+  color: #fca5a5;
+}
+
+.trade-profit.muted {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.trade-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+
+.trade-links a {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.trade-links a:hover {
+  color: var(--purple);
+}
+
 .icon-square {
   flex-shrink: 0;
   width: 32px;
@@ -390,6 +687,7 @@ button {
 }
 
 .content-box {
+  min-width: 0;
   border: 1px solid var(--card-border);
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.25);
@@ -436,6 +734,9 @@ button {
 
 .content-box-input {
   width: 100%;
+  min-width: 0;
+  min-height: calc(2 * 1.45em + 1.3rem);
+  box-sizing: border-box;
   border: none;
   background: transparent;
   color: var(--text);
@@ -445,7 +746,6 @@ button {
   line-height: 1.45;
   font-size: 0.88rem;
   outline: none;
-  field-sizing: content;
 }
 
 .content-box-input::placeholder {
@@ -453,7 +753,7 @@ button {
 }
 
 .thoughts-box .content-box-header {
-  background: rgba(168, 85, 247, 0.06);
+  background: linear-gradient(90deg, rgba(153, 69, 255, 0.08), rgba(20, 241, 149, 0.04));
 }
 
 .token-desc {
@@ -528,15 +828,17 @@ button {
 .btn-open {
   padding: 0.45rem 0.85rem;
   border-radius: 8px;
-  background: var(--purple);
-  color: #fff;
+  background: var(--sol-gradient);
+  color: #061018;
   font-size: 0.82rem;
   font-weight: 700;
   text-decoration: none;
+  box-shadow: 0 2px 12px var(--sol-glow-purple);
 }
 
 .btn-open:hover {
-  filter: brightness(1.08);
+  background: var(--sol-gradient-hover);
+  box-shadow: 0 4px 16px var(--sol-glow-purple);
 }
 
 .empty-state {
@@ -563,6 +865,47 @@ button {
   border-radius: 4px;
 }
 
+.empty-state.compact {
+  padding: 2rem 1.5rem;
+}
+
+.content-box.read-only .content-box-static {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.trade-card .side-pill {
+  font-size: 0.68rem;
+}
+
+.trade-pnl-hero.positive {
+  color: #5dffc0;
+}
+
+.trade-pnl-hero.negative {
+  color: #fca5a5;
+}
+
+.trade-mcap-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.trade-mcap-label {
+  color: var(--text-faint);
+}
+
+.trade-mcap-value {
+  font-weight: 600;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -579,10 +922,10 @@ button {
   width: min(520px, 100%);
   max-height: min(90vh, 840px);
   overflow: auto;
-  background: var(--bg-elevated);
-  border: 1px solid var(--card-border);
+  background: linear-gradient(165deg, #12151f 0%, #0e1018 100%);
+  border: 1px solid rgba(153, 69, 255, 0.2);
   border-radius: 18px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), 0 0 60px rgba(153, 69, 255, 0.08);
   padding: 1.35rem;
   animation: rise-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -619,7 +962,7 @@ button {
 }
 
 .tab.active {
-  background: rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(153, 69, 255, 0.28), rgba(20, 241, 149, 0.12));
   color: var(--text);
 }
 
@@ -650,15 +993,15 @@ button {
 
 .field input:focus,
 .field textarea:focus {
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 0 0 3px var(--purple-dim);
+  border-color: rgba(153, 69, 255, 0.5);
+  box-shadow: 0 0 0 3px var(--purple-dim), 0 0 20px rgba(20, 241, 149, 0.08);
 }
 
 .field textarea {
-  resize: none;
-  overflow: hidden;
+  min-height: calc(3 * 1.45em + 1.4rem);
+  box-sizing: border-box;
+  resize: vertical;
   line-height: 1.45;
-  field-sizing: content;
 }
 
 .form-actions {
@@ -779,14 +1122,92 @@ button {
   50% { opacity: 0.5; }
 }
 
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.login-card {
+  width: min(100%, 420px);
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid rgba(153, 69, 255, 0.18);
+  background: linear-gradient(165deg, rgba(18, 21, 31, 0.98) 0%, rgba(10, 12, 18, 0.99) 100%);
+  box-shadow:
+    var(--shadow),
+    0 0 60px rgba(153, 69, 255, 0.08);
+}
+
+.login-card.login-loading {
+  text-align: center;
+  color: var(--text-soft);
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.login-brand .brand-mark {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-sub {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.login-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  background: rgba(153, 69, 255, 0.1);
+  border: 1px solid rgba(153, 69, 255, 0.18);
+}
+
 @media (max-width: 720px) {
   .topbar {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .page-nav {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .page-nav-btn {
+    flex: 1;
   }
 
   .topbar-actions .btn {
     width: 100%;
+  }
+
+  .trade-row {
+    grid-template-columns: 1fr;
+  }
+
+  .trade-side {
+    align-items: flex-start;
   }
 
   .catalog-main {

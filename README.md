@@ -47,9 +47,55 @@ That's it. Frontend, API routes, and database are all on Vercel.
 | `/api/coins/[id]/refresh` | Refresh Pump.fun metadata |
 | `/api/lookup/[mint]` | Preview token before adding |
 
+## Wallet auto-tracker
+
+Watches a Solana wallet and **auto-adds winning Pump.fun tokens** to your catalog when realized profit is at least `$100` (configurable).
+
+### Flow
+
+1. **Helius webhook** detects wallet buys/sells in real time
+2. On **sell**, profit is checked via **GMGN** (if configured) or internal cost-basis tracking
+3. If profit ≥ threshold → fetch Pump.fun metadata + tweet text → save to Redis
+4. **Cron backup** scans every 5 minutes if a webhook is missed
+
+### Vercel env vars
+
+| Variable | Required | Description |
+|---|---|---|
+| `HELIUS_API_KEY` | Yes | Helius API key for webhooks + history |
+| `HELIUS_WEBHOOK_SECRET` | Yes | Auth header Helius sends to your webhook |
+| `CRON_SECRET` | Yes | Protects cron/setup routes |
+| `TRACKED_WALLET` | No | Default: `4mugTfk3Aw5X4rNTw8w3fgdAtKo76FVM4a8c9PNS1zSh` |
+| `MIN_PROFIT_USD` | No | Default: `100` |
+| `GMGN_API_KEY` | No | Improves per-token PnL accuracy |
+
+### One-time webhook setup (after deploy)
+
+```bash
+curl -X POST https://YOUR-APP.vercel.app/api/tracker/setup-webhook \
+  -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  -H "Content-Type: application/json"
+```
+
+Or create the webhook manually in the [Helius dashboard](https://dev.helius.xyz/dashboard/webhooks) pointing to:
+
+```
+https://YOUR-APP.vercel.app/api/webhooks/helius
+```
+
+### API routes
+
+| Path | What it does |
+|---|---|
+| `/api/webhooks/helius` | Receives Helius swap events |
+| `/api/cron/scan-wallet` | Backup wallet scan (Vercel cron) |
+| `/api/tracker/status` | Tracker health + stats |
+| `/api/tracker/setup-webhook` | Create Helius webhook via API |
+
 ## Features
 
 - **Add CA** — Fetches token data from Pump.fun
+- **Auto-track wallet** — Adds profitable trades automatically
 - **Token cards** — Dark-themed dashboard cards
 - **Tweet text** — Editable box for the original tweet
 - **My thoughts** — Separate notes section

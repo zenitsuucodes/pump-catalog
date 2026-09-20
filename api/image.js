@@ -1,6 +1,9 @@
+import { requireAuth } from './_lib/auth.js'
 import { fetchImageBuffer } from './_lib/images.js'
 
 export default async function handler(req, res) {
+  if (!requireAuth(req, res)) return
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
